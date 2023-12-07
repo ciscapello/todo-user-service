@@ -2,19 +2,21 @@ package http
 
 import (
 	"fmt"
-	"github.com/gorilla/mux"
 	"log"
 	"net/http"
-	auth "todo-user-service/internal/app/http/handlers"
+	"todo-user-service/internal/app/http/handlers/auth"
 	"todo-user-service/internal/app/http/middleware"
+	"todo-user-service/internal/services"
+
+	"github.com/gorilla/mux"
 )
 
-func RunServer(port string) {
+func RunServer(port string, userService *services.UserService) {
 	r := mux.NewRouter()
 	r.Use(middleware.Middleware)
-	//r.Use(middleware.Logger)
 
-	if err := auth.CreateAuthHandler(r); err != nil {
+	err := auth.CreateAuthHandler(r, userService)
+	if err != nil {
 		log.Fatal("failed to creating auth handler")
 	}
 
