@@ -21,7 +21,6 @@ func Connect() *pgxpool.Pool {
 		conf.DatabaseConfig.DbPort,
 		conf.DatabaseConfig.DbName)
 
-	fmt.Println(dsn)
 	dbpool, err := pgxpool.New(context.Background(), dsn)
 	if err != nil {
 		_, _ = fmt.Fprintf(os.Stderr, "Unable to create connection pool: %v\n", err)
@@ -31,7 +30,7 @@ func Connect() *pgxpool.Pool {
 
 	db := stdlib.OpenDBFromPool(dbpool)
 	if err := goose.Up(db, "/app/internal/app/database/migrations"); err != nil {
-		panic(err)
+		fmt.Println(err)
 	}
 
 	var greeting string
@@ -41,6 +40,5 @@ func Connect() *pgxpool.Pool {
 		os.Exit(1)
 	}
 
-	fmt.Println(greeting)
 	return dbpool
 }
