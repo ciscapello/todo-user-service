@@ -1,15 +1,13 @@
 package model
 
 import (
-	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
 )
 
 type User struct {
-	ID       uuid.UUID
-	Name     string
-	Phone    string
-	Password string
+	Id       int    `json:"id"`
+	Email    string `json:"email"`
+	Password string `json:"password"`
 }
 
 func (u *User) CheckPasswordHash(password string) bool {

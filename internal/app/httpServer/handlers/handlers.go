@@ -22,7 +22,6 @@ func NewHandler(services *services.Services, tokenManager *tokenManager.TokenMan
 }
 
 func (h *Handler) RunHandler() {
-
 	h.router.POST("/auth/register", h.Registration)
 	h.router.POST("/auth/login", h.Login)
 }
