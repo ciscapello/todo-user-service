@@ -10,7 +10,7 @@ import (
 )
 
 type registrationRequestBody struct {
-	Username        string `json:"username"`
+	Email           string `json:"email"`
 	Password        string `json:"password"`
 	ConfirmPassword string `json:"confirm_password"`
 }
@@ -35,7 +35,7 @@ func (h *Handler) Registration(c *gin.Context) {
 		return
 	}
 
-	id, errorMessage := h.services.UserService.CreateUser(body.Username, hashedPassword)
+	id, errorMessage := h.services.UserService.CreateUser(body.Email, hashedPassword)
 	if errorMessage != "" {
 		c.JSON(http.StatusBadRequest, gin.H{"message": errorMessage})
 		return
@@ -48,8 +48,8 @@ func (h *Handler) Registration(c *gin.Context) {
 }
 
 func validateRegistrationBody(writer http.ResponseWriter, body registrationRequestBody) error {
-	if len(body.Username) < 5 {
-		message := "username must be at least 11 symbols"
+	if len(body.Email) < 5 {
+		message := "email must be at least 11 symbols"
 		utils.ReturnBadRequestError(writer, http.StatusBadRequest, "message", message)
 		return errors.New(message)
 	}

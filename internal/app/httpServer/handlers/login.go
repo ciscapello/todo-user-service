@@ -11,7 +11,7 @@ import (
 )
 
 type loginRequestBody struct {
-	Username string `json:"username" validate:"required"`
+	Email    string `json:"email" validate:"required"`
 	Password string `json:"password" validate:"required"`
 }
 
@@ -25,12 +25,19 @@ func (h *Handler) Login(c *gin.Context) {
 	if err != nil {
 		return
 	}
+	someString, err := h.services.UserService.SignInUser(body.Email, body.Password)
+	if err != nil {
+		fmt.Println("ASDASDAS")
+		c.JSON(http.StatusForbidden, gin.H{"message": err.Error()})
+		return
+	}
+	fmt.Println(someString)
 
-	accessToken, err := h.tokenManager.GenerateAccessToken(body.Username)
+	accessToken, err := h.tokenManager.GenerateAccessToken(body.Email)
 	if err != nil {
 		fmt.Println(err)
 	}
-	refreshToken, err := h.tokenManager.GenerateRefreshToken(body.Username)
+	refreshToken, err := h.tokenManager.GenerateRefreshToken(body.Email)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -44,7 +51,7 @@ func (h *Handler) Login(c *gin.Context) {
 }
 
 func validateBody(writer http.ResponseWriter, body loginRequestBody) error {
-	if len(body.Username) < 5 {
+	if len(body.Email) < 5 {
 		message := "username must be at least 11 symbols"
 		utils.ReturnBadRequestError(writer, http.StatusBadRequest, "message", message)
 		return errors.New(message)

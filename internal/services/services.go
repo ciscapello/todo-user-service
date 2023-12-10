@@ -1,6 +1,10 @@
 package services
 
-import "github.com/jackc/pgx/v5/pgxpool"
+import (
+	"todo-user-service/internal/repository"
+
+	"github.com/jackc/pgx/v5/pgxpool"
+)
 
 type Services struct {
 	UserService  *UserService
@@ -8,8 +12,9 @@ type Services struct {
 }
 
 func Init(pool *pgxpool.Pool) *Services {
+	usersRepo := repository.NewUserRepo(pool)
 	return &Services{
-		UserService:  NewUserService(pool),
+		UserService:  NewUserService(usersRepo),
 		TodosService: NewTodosService(pool),
 	}
 }

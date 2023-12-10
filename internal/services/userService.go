@@ -1,51 +1,60 @@
 package services
 
 import (
-	"context"
+	"errors"
 	"fmt"
+	"time"
+	"todo-user-service/internal/repository"
 
-	"github.com/jackc/pgx/v5/pgxpool"
+	"golang.org/x/crypto/bcrypt"
+)
+
+var (
+	ErrInvalidPassword   = errors.New("invalid password")
+	ErrUserDoesNotExists = errors.New("user does not exists")
 )
 
 type UserService struct {
-	pool *pgxpool.Pool
+	repo *repository.UsersRepo
 }
 
-func NewUserService(dbPool *pgxpool.Pool) *UserService {
-	return &UserService{pool: dbPool}
+func NewUserService(repo *repository.UsersRepo) *UserService {
+	return &UserService{repo: repo}
 }
 
-func (s *UserService) CreateUser(username string, password string) (int, string) {
-	isUserExists := s.checkUserIsExists(username)
+func (s *UserService) CreateUser(email string, password string) (int, string) {
+	isUserExists := s.repo.CheckUserIsExists(email)
 	if isUserExists {
 		return 0, "user is already exists"
 	}
 
-	sqlStatement := `
-	INSERT INTO users (username, password)
-	VALUES ($1, $2)
-	RETURNING id`
-
-	var id int
-	err := s.pool.QueryRow(context.Background(), sqlStatement, username, password).Scan(&id)
-	if err != nil {
-		fmt.Printf("error %v", err)
-		return 0, "cannot create user in db"
-	}
-
-	return id, ""
+	id, errorMessage := s.repo.CreateUser(email, password)
+	return id, errorMessage
 }
 
-func (s *UserService) checkUserIsExists(username string) bool {
-	sqlStatement := `
-	SELECT id FROM users WHERE username=$1 LIMIT 1
-	`
-	var id int
-	err := s.pool.QueryRow(context.Background(), sqlStatement, username).Scan(&id)
+func (s *UserService) CreateSession(userId int, token string, expired_at time.Time) int {
+	id := s.repo.CreateSession(userId, token, expired_at)
+	return id
+}
+
+func (s *UserService) SignInUser(email string, password string) (string, error) {
+
+	user, err := s.repo.GetByEmail(email)
+	if err != nil || user.Email == "" {
+		return "", ErrUserDoesNotExists
+	}
+	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
+	fmt.Println(err)
+	if err != nil {
+		return "", ErrInvalidPassword
+	}
+
+	usr, err := s.repo.GetByEmail(email)
+	fmt.Printf("%v", user)
 	if err != nil {
 		fmt.Println(err)
 	}
-
-	fmt.Println(id)
-	return id != 0
+	// fmt.Println(hashedPassword)
+	fmt.Println(usr)
+	return "asdas", nil
 }
