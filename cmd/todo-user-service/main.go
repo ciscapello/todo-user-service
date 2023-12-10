@@ -2,25 +2,26 @@ package main
 
 import (
 	"fmt"
-	"todo-user-service/internal/app/database"
+	"todo-user-service/internal/app"
 	_ "todo-user-service/internal/app/database/migrations"
-	"todo-user-service/internal/app/http"
-	"todo-user-service/internal/config"
-	"todo-user-service/internal/services"
 )
 
 func main() {
 	fmt.Println("Application is runnin")
 	// TODO: Get config
-	conf := config.New()
+	app := app.Init()
+	app.Run()
 
-	// TODO: Run Database
-	pool := database.Connect()
+	// conf := config.New()
 
-	userService := services.NewUserService(pool)
+	// // TODO: Run Database
+	// pool := database.Connect()
 
-	// TODO: Run HTTP server
-	http.RunServer(conf.Port, userService)
+	// userService := services.NewUserService(pool)
+	// authService := services.NewAuthService()
+
+	// // // TODO: Run HTTP server
+	// http.RunServer(conf.Port, userService, authService)
 
 	// TODO: Run gRPC server
 
