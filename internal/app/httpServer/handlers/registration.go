@@ -35,9 +35,9 @@ func (h *Handler) Registration(c *gin.Context) {
 		return
 	}
 
-	id, err := h.services.UserService.CreateUser(body.Username, hashedPassword)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"message": "cannot create user"})
+	id, errorMessage := h.services.UserService.CreateUser(body.Username, hashedPassword)
+	if errorMessage != "" {
+		c.JSON(http.StatusBadRequest, gin.H{"message": errorMessage})
 		return
 	}
 
