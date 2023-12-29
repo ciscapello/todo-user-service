@@ -13,8 +13,9 @@ type Services struct {
 
 func Init(pool *pgxpool.Pool) *Services {
 	usersRepo := repository.NewUserRepo(pool)
+	sessionsRepo := repository.NewSessionsRepo(pool)
 	return &Services{
-		UserService:  NewUserService(usersRepo),
+		UserService:  NewUserService(usersRepo, sessionsRepo),
 		TodosService: NewTodosService(pool),
 	}
 }

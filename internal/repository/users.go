@@ -50,7 +50,7 @@ func (r *UsersRepo) CreateUser(email string, password string) (int, string) {
 
 func (r *UsersRepo) CreateSession(userId int, token string, expired_at time.Time) int {
 	sqlStatement := `
-	INSERT INTO users (user_id, refresh_token, expired_at)
+	INSERT INTO sessions (user_id, refresh_token, expired_at)
 	VALUES ($1, $2, $3)
 	RETURNING id
 	`

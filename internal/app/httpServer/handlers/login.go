@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"time"
 	"todo-user-service/internal/app/utils"
 
 	"github.com/gin-gonic/gin"
@@ -25,13 +26,11 @@ func (h *Handler) Login(c *gin.Context) {
 	if err != nil {
 		return
 	}
-	someString, err := h.services.UserService.SignInUser(body.Email, body.Password)
+	user, err := h.services.UserService.SignInUser(body.Email, body.Password)
 	if err != nil {
-		fmt.Println("ASDASDAS")
 		c.JSON(http.StatusForbidden, gin.H{"message": err.Error()})
 		return
 	}
-	fmt.Println(someString)
 
 	accessToken, err := h.tokenManager.GenerateAccessToken(body.Email)
 	if err != nil {
@@ -42,12 +41,15 @@ func (h *Handler) Login(c *gin.Context) {
 		fmt.Println(err)
 	}
 
+	h.services.UserService.CreateSession(user.Id, refreshToken, time.Now())
+
 	c.JSON(http.StatusOK, gin.H{
 		"message":      "ok",
 		"accessToken":  accessToken,
 		"refreshToken": refreshToken,
+		"email":        user.Email,
+		"id":           user.Id,
 	})
-
 }
 
 func validateBody(writer http.ResponseWriter, body loginRequestBody) error {

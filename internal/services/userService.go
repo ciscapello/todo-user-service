@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"time"
+	"todo-user-service/internal/domain/model"
 	"todo-user-service/internal/repository"
 
 	"golang.org/x/crypto/bcrypt"
@@ -15,46 +16,46 @@ var (
 )
 
 type UserService struct {
-	repo *repository.UsersRepo
+	usersRepo    *repository.UsersRepo
+	sessionsRepo *repository.SessionsRepo
 }
 
-func NewUserService(repo *repository.UsersRepo) *UserService {
-	return &UserService{repo: repo}
+func NewUserService(usersRepo *repository.UsersRepo, sessionsRepo *repository.SessionsRepo) *UserService {
+	return &UserService{usersRepo: usersRepo, sessionsRepo: sessionsRepo}
 }
 
 func (s *UserService) CreateUser(email string, password string) (int, string) {
-	isUserExists := s.repo.CheckUserIsExists(email)
+	isUserExists := s.usersRepo.CheckUserIsExists(email)
 	if isUserExists {
-		return 0, "user is already exists"
+		return 0, "this username is taken"
 	}
 
-	id, errorMessage := s.repo.CreateUser(email, password)
+	id, errorMessage := s.usersRepo.CreateUser(email, password)
 	return id, errorMessage
 }
 
 func (s *UserService) CreateSession(userId int, token string, expired_at time.Time) int {
-	id := s.repo.CreateSession(userId, token, expired_at)
+	id := s.usersRepo.CreateSession(userId, token, expired_at)
 	return id
 }
 
-func (s *UserService) SignInUser(email string, password string) (string, error) {
+func (s *UserService) SignInUser(email string, password string) (model.User, error) {
 
-	user, err := s.repo.GetByEmail(email)
+	user, err := s.usersRepo.GetByEmail(email)
 	if err != nil || user.Email == "" {
-		return "", ErrUserDoesNotExists
+		return model.User{}, ErrUserDoesNotExists
 	}
 	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
 	fmt.Println(err)
 	if err != nil {
-		return "", ErrInvalidPassword
+		return model.User{}, ErrInvalidPassword
 	}
 
-	usr, err := s.repo.GetByEmail(email)
+	usr, err := s.usersRepo.GetByEmail(email)
 	fmt.Printf("%v", user)
 	if err != nil {
 		fmt.Println(err)
 	}
-	// fmt.Println(hashedPassword)
-	fmt.Println(usr)
-	return "asdas", nil
+
+	return usr, nil
 }
