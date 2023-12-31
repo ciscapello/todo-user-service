@@ -7,15 +7,16 @@ import (
 )
 
 type Services struct {
-	UserService  *UserService
-	TodosService *TodosService
+	UserService    *UserService
+	ProjectService *ProjectService
 }
 
 func Init(pool *pgxpool.Pool) *Services {
 	usersRepo := repository.NewUserRepo(pool)
 	sessionsRepo := repository.NewSessionsRepo(pool)
+	projectsRepo := repository.NewProjectRepo(pool)
 	return &Services{
-		UserService:  NewUserService(usersRepo, sessionsRepo),
-		TodosService: NewTodosService(pool),
+		UserService:    NewUserService(usersRepo, sessionsRepo),
+		ProjectService: NewProjectService(projectsRepo, pool),
 	}
 }
